@@ -22,30 +22,16 @@ signal.signal(signal.SIGHUP, ignore)
 
 print(f"START at {datetime.datetime.now()}")
 
-# device_ready=False
-# while not device_ready:
-#   try:
-#     mqtt_client = mqtt.Client()
-#     client = MqttClientService(mqtt_client)
-#     client.connect()
-#     client.disconnect()
-#     device_ready=True
-#   except:
-#     print("Device not yet ready")
-#   time.sleep(1)
-
-mqtt_client = mqtt.Client()
-client = MqttClientService(mqtt_client)
-
-
 def main():
-    print("Starting sensedata background service ...")
-    client.connect()    
+    try:
+        print("Starting sensedata background service ...")
+        mqtt_client = mqtt.Client()
+        client = MqttClientService(mqtt_client)
+        client.connect()
+    finally:
+        client.disconnect()
 
-try:
-  while not is_shutdown:
+while not is_shutdown:
     main()
     time.sleep(1)
 
-finally:
-  client.disconnect()

@@ -17,7 +17,6 @@ class MqttClientService:
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_disconnect = self.on_disconnect
         self.mqtt_client.on_message = self.on_message
-        self.mqtt_client.subscribe(self.topic,0)
         self.mqtt_client.loop_forever()
     
     def disconnect(self):
@@ -31,6 +30,7 @@ class MqttClientService:
     def on_connect(self, client, userdata, rc, tc):
         if rc != 0:
             print(f"MQTT Client Connected Broker: {self.mqtt_broker}:{self.mqtt_broker_port}")
+            self.mqtt_client.subscribe(self.topic,1)
 
     # def start_read_loop(self):
     #     self.mqtt_client.loop_forever()
