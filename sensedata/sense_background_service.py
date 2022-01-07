@@ -5,6 +5,7 @@ import sys
 
 import paho.mqtt.client as mqtt
 from mqtt.mqtt_client_service import MqttClientService
+from domain.processing_service import ProcessingService
 
 
 is_shutdown = False
@@ -26,7 +27,9 @@ def main():
     try:
         print("Starting sensedata background service ...")
         mqtt_client = mqtt.Client()
-        client = MqttClientService(mqtt_client)
+        processing_service = ProcessingService()
+        client = MqttClientService(mqtt_client, processing_service)
+
         client.connect()
     finally:
         client.disconnect()
