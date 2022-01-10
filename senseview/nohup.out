@@ -1,0 +1,10 @@
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+January 09, 2022 - 16:54:07
+Django version 4.0.1, using settings 'senseview.settings'
+Starting development server at http://10.0.0.8:8000/
+Quit the server with CONTROL-C.
+[09/Jan/2022 16:54:21] "GET /data/ HTTP/1.1" 200 44562
+[09/Jan/2022 16:54:22] "GET /data/ HTTP/1.1" 200 44562

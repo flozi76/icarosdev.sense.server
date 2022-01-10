@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <title>Environment Data</title>
+  </head>
+  <body>
+    
+    <canvas id="temperature" style="width:100%"></canvas>
+    <canvas id="humidity" style="width:100%"></canvas>
+    <canvas id="pressure" style="width:100%"></canvas>
+    
+    {% block content %}
+    <script>
+
+      var options = {
+        scales: {
+          xAxes: [{
+            type: 'time',
+            time: {
+              unit: 'hour', //I have tried minutes and hours too, same result
+              displayFormats: {
+                'millisecond': 'HH:mm:ss a', //I have tried without the 'a' too, same result
+                'second': 'HH:mm:ss a',
+                'minute': 'HH:mm:ss',
+                'hour': 'dd HH:mm:ss',
+                'day': 'HH:mm:ss a',
+                'week': 'HH:mm:ss a',
+                'month': 'HH:mm:ss a',
+                'quarter': 'HH:mm:ss a',
+                'year': 'HH:mm:ss a',
+              }
+            }
+          }]
+        }
+      };
+
+    var configTemp = {
+      type: 'line',
+      data: {
+        datasets: [{
+            label: 'Temperature',
+            borderColor: "rgba(200,100,0,0.9)",
+            data: {{ dataTemp|safe }},
+        }],
+        labels: {{ labels|safe }}
+      },
+      options: options,
+    }; 
+    var configHum = {
+      type: 'line',
+      data: {
+        datasets: [{
+            label: 'Humidity',
+            borderColor: "rgba(10,100,200,0.9)",
+            data: {{ dataHum|safe }},
+        }],
+        labels: {{ labels|safe }}
+      },
+      options: options,
+    };
+    
+    var configPress = {
+      type: 'line',
+      data: {
+        datasets: [{
+            label: 'Pressure',
+            borderColor: "rgba(10,200,200,0.9)",
+            data: {{ dataPress|safe }},
+        }],
+        labels: {{ labels|safe }}
+      },
+      options: options
+    };
+
+    window.onload = function() {
+      var ctxTemp = document.getElementById('temperature');
+      window.myPie = new Chart(ctxTemp, configTemp); 
+      
+      var ctxPress = document.getElementById('pressure');
+      window.myPie = new Chart(ctxPress, configPress); 
+
+      var ctxHum = document.getElementById('humidity');
+      window.myPie = new Chart(ctxHum, configHum);
+    };
+
+
+    </script>
+    {% endblock %}
+  </body>
+</html>
+
