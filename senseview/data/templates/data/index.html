@@ -8,11 +8,16 @@
   </head>
   <body>
     
+    {% for key, value in item_dictionary.items %}
+      <p>{{key}}
+        <span>{{value}}</span>
+      </p>
+    {% endfor %}
+
     <canvas id="temperature" style="width:100%"></canvas>
     <canvas id="humidity" style="width:100%"></canvas>
     <canvas id="pressure" style="width:100%"></canvas>
     
-    {% block content %}
     <script>
 
       var options = {
@@ -88,7 +93,6 @@
 
 
     </script>
-    {% endblock %}
   </body>
 </html>
 
