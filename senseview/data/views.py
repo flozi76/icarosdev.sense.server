@@ -23,29 +23,41 @@ def verifyPeriodPassed(currItemDateTime, lastItemDateTime):
 
 def add_item_to_dictionary(item_dictionary, json_object):
     device_name = json_object['raspi_name']
+    device_name = device_name.replace("-","_")
     
     if not item_dictionary.get(device_name):
-        item_dictionary[device_name] = []
+        item_dictionary[device_name] = dict()
     
-    item_dictionary[device_name].append(json_object)
+    dict_vals = item_dictionary[device_name]
+    
+    curr_datetime_object = datetime.strptime(json_object['date_time'],"%Y-%m-%d %H:%M:%S.%f%z")
+    currItemDateTime = get_datetime_read_string(curr_datetime_object)
+    
+    data = json_object['env_data']
+    for key in data:
+        if not dict_vals.get(key):
+            dict_vals[key] = { 'labels' : [], 'data' : []}
+        dict_vals[key]['data'].append(data[key])
+        dict_vals[key]['labels'].append(currItemDateTime)
 
 def index(request, countHours=None):
     db = TinyDB('/home/pi/app/database/database/db.sensedata', create_dirs=True)
     
     item_dictionary = dict()
     data_keys_dictionary = dict() # add datakeys per device type to generate diagrams automatically.
-    
+    countHours = countHours * 6
     environment_data = db.all()
+    environment_data = environment_data[-countHours:]
     labels = []
     dataTemp = []
     dataPress = []
     dataHum = []
     
-    countHours = countHours * 6
+    
     
     curr_datetime_object = None
     last_datetime_object = None
-    for item in db:
+    for item in environment_data:
         data = item['env_data']
         
         if data['pressure'] < 100:
@@ -63,12 +75,6 @@ def index(request, countHours=None):
         dataPress.append(data['pressure'])
         dataHum.append(data['humidity'])
 
-
-
-    labels = labels[-countHours:]
-    dataTemp = dataTemp[-countHours:]
-    dataPress = dataPress[-countHours:]
-    dataHum = dataHum[-countHours:]
 
     context = {
         'environment_data': environment_data,

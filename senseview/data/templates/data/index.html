@@ -1,7 +1,10 @@
 <!DOCTYPE html>
+
 <html>
   <head>
+    {% load static %}
     <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="{% static 'data/css/data.css' %}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
     <title>Environment Data</title>
@@ -9,18 +12,36 @@
   <body>
     
     {% for key, value in item_dictionary.items %}
-      <p>{{key}}
-        <span>{{value}}</span>
+      <p><h1>{{key}}</h1>
+        {% for key_d, value_d in value.items %}
+        <button type="button" class="collapsible"><h2>{{key_d}}</h2></button>
+        <div class="content">
+        <p>
+          <canvas id="{{key}}_{{key_d}}" style="width:100%"></canvas>
+        </p>
+      </div>
+        {% endfor %}
       </p>
     {% endfor %}
-
-    <canvas id="temperature" style="width:100%"></canvas>
-    <canvas id="humidity" style="width:100%"></canvas>
-    <canvas id="pressure" style="width:100%"></canvas>
     
     <script>
 
-      var options = {
+      var coll = document.getElementsByClassName("collapsible");
+      var i;
+
+      for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+          this.classList.toggle("active");
+          var content = this.nextElementSibling;
+          if (content.style.display === "block") {
+            content.style.display = "none";
+          } else {
+            content.style.display = "block";
+          }
+        });
+      }
+
+      var optionsDefault = {
         scales: {
           xAxes: [{
             type: 'time',
@@ -42,55 +63,77 @@
         }
       };
 
-    var configTemp = {
-      type: 'line',
-      data: {
-        datasets: [{
-            label: 'Temperature',
-            borderColor: "rgba(200,100,0,0.9)",
-            data: {{ dataTemp|safe }},
-        }],
-        labels: {{ labels|safe }}
-      },
-      options: options,
-    }; 
-    var configHum = {
-      type: 'line',
-      data: {
-        datasets: [{
-            label: 'Humidity',
-            borderColor: "rgba(10,100,200,0.9)",
-            data: {{ dataHum|safe }},
-        }],
-        labels: {{ labels|safe }}
-      },
-      options: options,
-    };
-    
-    var configPress = {
-      type: 'line',
-      data: {
-        datasets: [{
-            label: 'Pressure',
-            borderColor: "rgba(10,200,200,0.9)",
-            data: {{ dataPress|safe }},
-        }],
-        labels: {{ labels|safe }}
-      },
-      options: options
-    };
+      var optionsYAxesZero = {
+        scales: {
+          xAxes: [{
+            type: 'time',
+            time: {
+              unit: 'hour', //I have tried minutes and hours too, same result
+              displayFormats: {
+                'millisecond': 'HH:mm:ss a', //I have tried without the 'a' too, same result
+                'second': 'HH:mm:ss a',
+                'minute': 'HH:mm:ss',
+                'hour': 'dd HH:mm:ss',
+                'day': 'HH:mm:ss a',
+                'week': 'HH:mm:ss a',
+                'month': 'HH:mm:ss a',
+                'quarter': 'HH:mm:ss a',
+                'year': 'HH:mm:ss a',
+              }
+            }
+          }],
+          yAxes: [{
+            display: true,
+            ticks: {
+                suggestedMin: 10,    // minimum will be 0, unless there is a lower value.
+                // OR //
+                //beginAtZero: true   // minimum value will be 0.
+            }
+          }]
+        }
+      };
+  
+      function random_rgba() {
+        var o = Math.round, r = Math.random, s = 255;
+        return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',0.9)';
+      }
+
+    {% for key, value in item_dictionary.items %}
+      {% for key_d, value_d in value.items %}
+        var options = optionsDefault;
+        {% if key_d == "temperature" %}
+          options = optionsYAxesZero;
+        {%endif%}
+        var color = random_rgba();
+          var config{{key}}_{{key_d}} = {
+            type: 'line',
+            data: {
+              datasets: [{
+                  label: '{{key_d|safe}}',
+                  borderColor: color,
+                  data: {{ value_d.data|safe }},
+              }],
+              labels: {{ value_d.labels|safe }}
+            },
+            options: options
+          };
+
+      {% endfor %}
+    {% endfor %}
 
     window.onload = function() {
-      var ctxTemp = document.getElementById('temperature');
-      window.myPie = new Chart(ctxTemp, configTemp); 
-      
-      var ctxPress = document.getElementById('pressure');
-      window.myPie = new Chart(ctxPress, configPress); 
 
-      var ctxHum = document.getElementById('humidity');
-      window.myPie = new Chart(ctxHum, configHum);
+      {% for key, value in item_dictionary.items %}
+        {% for key_d, value_d in value.items %}
+            var {{key}}_{{key_d}} = document.getElementById('{{key}}_{{key_d}}');
+            window.myChart{{key_d}} = new Chart({{key}}_{{key_d}}, config{{key}}_{{key_d}});
+
+        {% endfor %}
+      {% endfor %}
+
     };
 
+ 
 
     </script>
   </body>
